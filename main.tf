@@ -158,8 +158,6 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
       }
 
       network_interface {
-        ipv4_address = ""
-        ipv4_netmask = ""
       }
     }
   }
@@ -167,6 +165,7 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
   # Wait for the VM to be ready
   wait_for_guest_net_timeout = 5  # Wait up to 5 minutes for network
   wait_for_guest_ip_timeout  = 5  # Wait up to 5 minutes for IP
+  wait_for_guest_net_routable = false  # Don't wait for routable
 
   connection {
     type     = "ssh"
