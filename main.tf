@@ -167,6 +167,10 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
   wait_for_guest_ip_timeout  = 5  # Wait up to 5 minutes for IP
   wait_for_guest_net_routable = false  # Don't wait for routable
 
+  cdrom {
+    client_device = true
+  }
+
   connection {
     type     = "ssh"
     user     = var.ssh_username
