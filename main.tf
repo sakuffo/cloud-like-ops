@@ -138,7 +138,7 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
 
   network_interface {
     network_id   = data.vsphere_network.network.id
-    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
+    adapter_type = "vmxnet3"
   }
 
   disk {
@@ -157,7 +157,10 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
         domain    = "local"
       }
 
-      network_interface {}
+      network_interface {
+        ipv4_address = ""
+        ipv4_netmask = ""
+      }
     }
   }
 
