@@ -18,31 +18,6 @@ provider "vsphere" {
   allow_unverified_ssl = true
 }
 
-# Data sources
-data "vsphere_datacenter" "dc" {
-  name = var.datacenter
-}
-
-data "vsphere_compute_cluster" "cluster" {
-  name          = var.cluster
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "vsphere_datastore" "datastore" {
-  name          = var.datastore
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "vsphere_network" "network" {
-  name          = var.network
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "vsphere_virtual_machine" "template" {
-  name          = var.vm_template
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
 # Use the ubuntu-vm-nginx module
 module "ubuntu_nginx_vm" {
   source = "./modules/ubuntu-vm-nginx"
@@ -67,15 +42,3 @@ module "ubuntu_nginx_vm" {
   ssh_password = var.ssh_password
 }
 
-# Output the module's outputs
-output "vm_ip" {
-  value = module.ubuntu_nginx_vm.vm_ip
-}
-
-output "vm_name" {
-  value = module.ubuntu_nginx_vm.vm_name
-}
-
-output "nginx_url" {
-  value = module.ubuntu_nginx_vm.nginx_url
-}

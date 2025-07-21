@@ -39,9 +39,9 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
   }
 
   # Wait for the VM to be ready
-  wait_for_guest_net_timeout  = 5     # Wait up to 5 minutes for network
-  wait_for_guest_ip_timeout   = 5     # Wait up to 5 minutes for IP
-  wait_for_guest_net_routable = false # Don't wait for routable
+  wait_for_guest_net_timeout  = 3     # Wait up to 5 minutes for network
+  wait_for_guest_ip_timeout   = 3     # Wait up to 5 minutes for IP
+  # wait_for_guest_net_routable = false # Don't wait for routable
 
   cdrom {
     client_device = true
@@ -65,8 +65,8 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
   # Install nginx
   provisioner "remote-exec" {
     inline = [
-      "sudo apt-get update",
-      "sudo apt-get install -y nginx",
+      "sudo apt update",
+      "sudo apt install -y nginx",
       "sudo systemctl start nginx",
       "sudo systemctl enable nginx",
       "sudo systemctl status nginx"
