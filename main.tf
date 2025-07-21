@@ -157,16 +157,13 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
         domain    = "local"
       }
 
-      network_interface {
-        ipv4_address = ""  # Empty for DHCP
-        ipv4_netmask = 0   # 0 for DHCP
-      }
+      network_interface {}
     }
   }
 
   # Wait for the VM to be ready
-  wait_for_guest_net_timeout = 0
-  wait_for_guest_ip_timeout  = 0
+  wait_for_guest_net_timeout = 5  # Wait up to 5 minutes for network
+  wait_for_guest_ip_timeout  = 5  # Wait up to 5 minutes for IP
 
   connection {
     type     = "ssh"
@@ -174,6 +171,13 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
     password = var.ssh_password
     host     = self.default_ip_address
     timeout  = "10m"
+  }
+
+  # Wait for SSH to be ready
+  provisioner "remote-exec" {
+    inline = [
+      "echo 'VM is ready for provisioning'"
+    ]
   }
 
   # Install nginx
