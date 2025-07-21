@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(mkdir:*)",
+      "Bash(terraform fmt:*)",
+      "Bash(terraform:*)"
+    ],
+    "deny": []
+  }
+}
