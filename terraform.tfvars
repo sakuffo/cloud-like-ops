@@ -8,3 +8,4 @@ network          = "vds01-mgmt-01a"
 vm_template      = "Ubuntu-VM"
 ssh_username     = "ubuntu"
 ssh_password     = "VMware123!"
+vm_count         = 3

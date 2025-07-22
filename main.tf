@@ -97,6 +97,30 @@ variable "ssh_password" {
   sensitive   = true
 }
 
+variable "vm_count" {
+  description = "Number of VMs to create"
+  type        = number
+  default     = 1
+}
+
+variable "static_ips" {
+  description = "List of static IP addresses (leave empty for DHCP)"
+  type        = list(string)
+  default     = []
+}
+
+variable "netmask" {
+  description = "Network mask for static IPs (e.g., 24 for /24)"
+  type        = number
+  default     = 24
+}
+
+variable "gateway" {
+  description = "Gateway for static IPs"
+  type        = string
+  default     = ""
+}
+
 # Data sources
 data "vsphere_datacenter" "dc" {
   name = var.datacenter
@@ -124,7 +148,8 @@ data "vsphere_virtual_machine" "template" {
 
 # Create the VM
 resource "vsphere_virtual_machine" "ubuntu_nginx" {
-  name             = var.vm_name
+  count            = var.vm_count
+  name             = "${var.vm_name}-${count.index + 1}"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
   folder           = "/"
@@ -153,12 +178,16 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
 
     customize {
       linux_options {
-        host_name = var.vm_name
+        host_name = "${var.vm_name}-${count.index + 1}"
         domain    = "local"
       }
 
       network_interface {
+        ipv4_address = length(var.static_ips) > 0 ? var.static_ips[count.index] : ""
+        ipv4_netmask = length(var.static_ips) > 0 ? var.netmask : 0
       }
+      
+      ipv4_gateway = length(var.static_ips) > 0 ? var.gateway : ""
     }
   }
 
@@ -186,35 +215,17 @@ resource "vsphere_virtual_machine" "ubuntu_nginx" {
     ]
   }
 
-  # Install nginx
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt-get update",
-      "sudo apt-get install -y nginx",
-      "sudo systemctl start nginx",
-      "sudo systemctl enable nginx",
-      "sudo systemctl status nginx"
-    ]
-  }
-
-  # Optional: Configure firewall
-  provisioner "remote-exec" {
-    inline = [
-      "sudo ufw allow 'Nginx Full'",
-      "sudo ufw --force enable"
-    ]
-  }
 }
 
-# Output the VM's IP address
-output "vm_ip" {
-  value = vsphere_virtual_machine.ubuntu_nginx.default_ip_address
+# Output the VMs' IP addresses
+output "vm_ips" {
+  value = [for vm in vsphere_virtual_machine.ubuntu_nginx : vm.default_ip_address]
 }
 
-output "vm_name" {
-  value = vsphere_virtual_machine.ubuntu_nginx.name
+output "vm_names" {
+  value = [for vm in vsphere_virtual_machine.ubuntu_nginx : vm.name]
 }
 
-output "nginx_url" {
-  value = "http://${vsphere_virtual_machine.ubuntu_nginx.default_ip_address}"
+output "nginx_urls" {
+  value = [for vm in vsphere_virtual_machine.ubuntu_nginx : "http://${vm.default_ip_address}"]
 }
